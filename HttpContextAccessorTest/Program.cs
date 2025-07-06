@@ -69,28 +69,30 @@ public class Observer(IHttpContextAccessor httpContextAccessor) {
 
         if (httpContextAccessor is null)
             throw new Exception($"Sess Id form context is null. Sess Id from request: {sessIdFromRequest}");
-
-        using var scope = httpContextAccessor.HttpContext?.RequestServices.CreateScope();
-        var sessIdFromSessionStore = scope.ServiceProvider.GetRequiredService<SessionStoreMock>().GetSessionId();
-        var sessIdFromContext = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext?.Request?.Headers?["sess-id"];
-
         var errors = new List<string>();
+        string sessIdFromContext = "";
+        Task.Run(() =>
+        {
+            using var scope = httpContextAccessor.HttpContext?.RequestServices.CreateScope();
+            var sessIdFromSessionStore = scope.ServiceProvider.GetRequiredService<SessionStoreMock>().GetSessionId();
+            sessIdFromContext = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext?.Request?.Headers?["sess-id"];
 
-        if (sessIdFromContext is null)
-            errors.Add($"Sess Id form context is null. Sess Id from request: {sessIdFromRequest}");
 
-        if (sessIdFromContext.ToString() != sessIdFromRequest)
-            errors.Add($"Context sessid({sessIdFromContext}) does not match sessidFromRequest {sessIdFromRequest}");
+            if (sessIdFromContext is null)
+                errors.Add($"Sess Id form context is null. Sess Id from request: {sessIdFromRequest}");
 
-        if(sessIdFromSessionStore is null)
-            errors.Add($"Sess Id from store is null. Sess Id from request: {sessIdFromRequest}");
+            if (sessIdFromContext.ToString() != sessIdFromRequest)
+                errors.Add($"Context sessid({sessIdFromContext}) does not match sessidFromRequest {sessIdFromRequest}");
 
-        if (sessIdFromSessionStore != sessIdFromRequest)
-            errors.Add($"Context sessid({sessIdFromSessionStore}) does not match sessidFromRequest {sessIdFromRequest}");
+            if (sessIdFromSessionStore is null)
+                errors.Add($"Sess Id from store is null. Sess Id from request: {sessIdFromRequest}");
 
-        if (sessIdFromSessionStore != sessIdFromContext.ToString())
-            errors.Add($"Context sessid({sessIdFromSessionStore}) does not match sessidFromContext {sessIdFromContext.ToString()}");
+            if (sessIdFromSessionStore != sessIdFromRequest)
+                errors.Add($"Context sessid({sessIdFromSessionStore}) does not match sessidFromRequest {sessIdFromRequest}");
 
+            if (sessIdFromSessionStore != sessIdFromContext.ToString())
+                errors.Add($"Context sessid({sessIdFromSessionStore}) does not match sessidFromContext {sessIdFromContext.ToString()}");
+        }).Wait();
         if (errors.Any())
             throw new Exception(string.Join(';', errors));
 

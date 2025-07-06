@@ -6,7 +6,7 @@ Console.WriteLine("Hello, World!");
 
 
 int numTasks = 200;
-int numIterations = 2000;
+int numIterations = 1000;
 int maxdop = 100;
 string url = "logRequest";
 url = "observeScope";
