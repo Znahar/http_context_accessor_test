@@ -8,6 +8,8 @@ Console.WriteLine("Hello, World!");
 int numTasks = 200;
 int numIterations = 2000;
 int maxdop = 100;
+string url = "logRequest";
+url = "observeScope";
 
 var tasks = new List<Action>();
 for(int i = 0; i < numTasks; i++)
@@ -17,7 +19,7 @@ for(int i = 0; i < numTasks; i++)
         var client = new HttpClient();
         for(int j = 0; j < numIterations; j++)
         {
-            var mes = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5247/logRequest");
+            var mes = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:5247/{url}");
             var sessid = $"{Thread.CurrentThread.ManagedThreadId}-{j}";
             mes.Headers.Add("sess-id", sessid);
             var resp = client.SendAsync(mes).Result;
